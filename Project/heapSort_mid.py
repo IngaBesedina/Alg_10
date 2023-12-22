@@ -7,11 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-my_setup = """
-from __main__ import reverse_list
-from __main__ import heap_sort
-"""
-
 
 def heapify(sort_list, n, i):
     largest = i
@@ -44,26 +39,37 @@ def n_log_n(x, a, b):
     return a * x * np.log(x) + b
 
 
-N = 1000
-x = np.array(range(10, N + 1, 10))
-y = []
-for n in range(10, N + 1, 10):
-    sort_list = np.array(np.random.randint(-100, 100, n))
-    reverse_list = sorted(sort_list, reverse=True)
-    y.append(ti.timeit(setup=my_setup, stmt="heap_sort(reverse_list)", number=30))
-
-popt, pcov = curve_fit(n_log_n, x, y)
-a_opt, b_opt = popt
-
-x_fit = np.linspace(min(x), max(x), 100)
-y_fit = n_log_n(x_fit, a_opt, b_opt)
+def timer(num):
+    y = []
+    repeat = 30
+    for n in range(10, num + 1, 10):
+        random_list = np.array(np.random.randint(-100, 100, n))
+        y.append(ti.timeit(lambda: heap_sort(random_list), number=repeat) / repeat)
+    return y
 
 
-plt.scatter(x, y, s=5, color="b")
-plt.plot(x_fit, y_fit, color="r")
-plt.xlabel("Размер массива")
-plt.ylabel("Время работы функции")
-plt.title("Средний случай")
-plt.show()
+def create_graphs(x, y):
+    popt, pcov = curve_fit(n_log_n, x, y)
+    a_opt, b_opt = popt
+
+    x_fit = np.linspace(min(x), max(x), 100)
+    y_fit = n_log_n(x_fit, a_opt, b_opt)
+
+    plt.scatter(x, y, s=5, color="b")
+    plt.plot(x_fit, y_fit, color="r")
+    plt.xlabel("Размер массива")
+    plt.ylabel("Время работы функции")
+    plt.title("Средний случай")
+    plt.show()
 
 
+def main():
+    num = 1000
+    x = np.array(range(10, num + 1, 10))
+    y = timer(num)
+
+    create_graphs(x, y)
+
+
+if __name__ == '__main__':
+    main()
